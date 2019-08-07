@@ -31,10 +31,10 @@ router.post('/', (req, res) => {
     const postInfo = req.body
 
     if(!postInfo.title.trim()) {
-        res.status(400).json({ errorMessage: "Please provide title for the post." })
+        return res.status(400).json({ errorMessage: "Please provide title for the post." })
     } 
     else if(!postInfo.contents.trim()) {
-        res.status(400).json({ errorMessage: "Please provide contents for the post." })
+        return res.status(400).json({ errorMessage: "Please provide contents for the post." })
     }
 
     Posts.insert(postInfo)
@@ -47,6 +47,34 @@ router.post('/', (req, res) => {
         .catch(err => {
             res.status(500).json({ error: "There was an error while saving the post to the database" })
         })
+});
+
+router.put('/:id', (req, res) => {
+    const postId = req.params.id
+    const postChanges = req.body
+
+    if(!postChanges.title.trim()) {
+       return res.status(400).json({ errorMessage: "Please provide title for the post." })
+    } 
+    else if(!postChanges.contents.trim()) {
+       return res.status(400).json({ errorMessage: "Please provide contents for the post." })
+    }
+
+    Posts.update(postId, postChanges)
+        .then(num => {
+            if (num === 1) {
+                Posts.findById(postId)
+                    .then(post => {
+                        res.status(200).json(post);
+                    })
+            } else {
+                res.status(404).json({ message: "The post with the specified ID does not exist."  });
+            }
+        })
+        .catch(error => {
+            res.status(500).json({ error: "The post information could not be modified." });
+        })
+    
 });
 
 router.delete('/:id', (req, res) => {
